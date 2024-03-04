@@ -15,3 +15,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.calendarGrid {
+  background-color: cornsilk;
+  background-image: linear-gradient(to bottom, grey 1px, transparent 1px);
+}
