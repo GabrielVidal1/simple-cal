@@ -105,6 +105,10 @@ export const processCalEvents = (
   startingHour = 8,
   endingHour = 21
 ): CalBlock[] => {
+  if (startingHour >= endingHour) {
+    throw new Error("Starting hour must be before ending hour");
+  }
+
   // preprocess events
   const sortedEvents = calEvents
     .map((e) => preprocessEvent(totalHeight, startingHour, endingHour)(e))
