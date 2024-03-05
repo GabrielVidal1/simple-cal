@@ -7,17 +7,25 @@ import { processCalEvents } from "./helpers";
 
 interface CalendarProps {
   events: CalEvent[];
+
+  startingHour?: number;
+
+  endingHour?: number;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ events }) => {
+export const Calendar: React.FC<CalendarProps> = ({
+  events,
+  startingHour = 8,
+  endingHour = 21,
+}) => {
   const { width, height } = useWindowDimensions();
 
   const blocks = useMemo(
-    () => processCalEvents(events, height),
-    [events, height]
+    () => processCalEvents(events, height, startingHour, endingHour),
+    [events, height, startingHour, endingHour]
   );
 
-  const stripeSize = height / 24;
+  const stripeSize = height / (endingHour - startingHour);
 
   return (
     <div

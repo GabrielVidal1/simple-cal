@@ -13,12 +13,17 @@ export interface ComputedCalEvent extends CalEvent {
  * @returns calendar event with computed properties top and height
  */
 const preprocessEvent =
-  (totalHeight: number) =>
-  (event: CalEvent): ComputedCalEvent => {
+  (totalHeight: number, startingHour: number, endingHour: number) =>
+  (event: CalEvent): ComputedCalEvent | null => {
     const [hours, minutes] = event.start.split(":").map((n) => parseInt(n, 10));
-    const start = hours + minutes / 60;
-    const top = (start * totalHeight) / 24;
-    const height = (event.duration * totalHeight) / 60 / 24;
+
+    if (hours < startingHour || hours > endingHour) {
+      return null;
+    }
+    const totalHours = endingHour - startingHour;
+    const start = hours - startingHour + minutes / 60;
+    const top = (start * totalHeight) / totalHours;
+    const height = (event.duration * totalHeight) / 60 / totalHours;
     return {
       ...event,
       top,
@@ -96,10 +101,15 @@ const groupToColumns = (group: ComputedCalEvent[]): CalBlock => {
  */
 export const processCalEvents = (
   calEvents: CalEvent[],
-  totalHeight: number
+  totalHeight: number,
+  startingHour = 8,
+  endingHour = 21
 ): CalBlock[] => {
   // preprocess events
-  const sortedEvents = calEvents.map((e) => preprocessEvent(totalHeight)(e));
+  const sortedEvents = calEvents
+    .map((e) => preprocessEvent(totalHeight, startingHour, endingHour)(e))
+    .filter(Boolean) as ComputedCalEvent[];
+
   sortedEvents.sort((a, b) => a.top - b.top);
 
   if (sortedEvents.length === 1) {
