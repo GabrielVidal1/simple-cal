@@ -35,8 +35,9 @@ const groupOverlapping = (
 ): ComputedCalEvent[][] => {
   const result: ComputedCalEvent[][] = [];
   let pos = 0;
-  let current = sortedEvents.shift();
   let currentGroup = [];
+
+  let current = sortedEvents.shift();
   while (current) {
     if (!currentGroup.length) {
       pos = current.top + current.height;
@@ -49,7 +50,6 @@ const groupOverlapping = (
         current = sortedEvents.shift();
       } else {
         result.push(currentGroup);
-
         currentGroup = [];
       }
     }
@@ -66,22 +66,14 @@ const groupOverlapping = (
  * @returns different columns
  */
 const groupToColumns = (group: ComputedCalEvent[]): CalBlock => {
-  const groupCopy = group.slice();
+  const columns: { pos: number; events: ComputedCalEvent[] }[] = [];
+  let i = 0;
 
-  let current = groupCopy.shift();
-
-  const columns = [
-    {
-      pos: (current?.top ?? 0) + (current?.height ?? 0),
-      events: current ? [current] : [],
-    },
-  ];
-
-  current = groupCopy.shift();
-
+  let current = group.shift();
   while (current) {
-    let i = 0;
-    for (; i < columns.length && columns[i].pos > current.top; i++) {}
+    // find the first column that has enough space or create a new one
+    for (i = 0; i < columns.length && columns[i].pos > current.top; i++) {}
+
     if (i < columns.length) {
       columns[i] = {
         events: [...columns[i].events, current],
@@ -91,7 +83,7 @@ const groupToColumns = (group: ComputedCalEvent[]): CalBlock => {
       columns.push({ pos: current.top + current.height, events: [current] });
     }
 
-    current = groupCopy.shift();
+    current = group.shift();
   }
 
   return columns.map(({ events }) => events);
@@ -106,6 +98,7 @@ export const processCalEvents = (
   calEvents: CalEvent[],
   totalHeight: number
 ): CalBlock[] => {
+  // preprocess events
   const sortedEvents = calEvents.map((e) => preprocessEvent(totalHeight)(e));
   sortedEvents.sort((a, b) => a.top - b.top);
 
@@ -113,6 +106,6 @@ export const processCalEvents = (
     return [[[sortedEvents[0]]]];
   }
 
-  const groups = groupOverlapping(sortedEvents);
-  return groups.map((g) => groupToColumns(g));
+  // convert to groups, then split groups into columns
+  return groupOverlapping(sortedEvents).map((g) => groupToColumns(g));
 };
