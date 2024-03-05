@@ -4,6 +4,7 @@ import React from "react";
 import useWindowDimensions from "./useWindowDimensions";
 import { CalEvent } from "../../types";
 import { processCalEvents } from "./helpers";
+import CalendarBackground from "./background";
 
 interface CalendarProps {
   events: CalEvent[];
@@ -25,12 +26,10 @@ export const Calendar: React.FC<CalendarProps> = ({
     [events, height, startingHour, endingHour]
   );
 
-  const stripeSize = height / (endingHour - startingHour);
-
   return (
     <div
-      className="calendarGrid flex flex-col items-stretch w-full relative"
-      style={{ height, width, backgroundSize: `10px ${stripeSize}px` }}
+      className="flex flex-col items-stretch w-full relative"
+      style={{ height, width }}
     >
       {blocks.map((block, i) => (
         <div key={i} className="flex w-full">
@@ -49,6 +48,8 @@ export const Calendar: React.FC<CalendarProps> = ({
           ))}
         </div>
       ))}
+
+      <CalendarBackground startingHour={startingHour} endingHour={endingHour} />
     </div>
   );
 };
